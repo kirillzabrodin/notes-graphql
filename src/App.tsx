@@ -6,7 +6,23 @@ import NoteList from './Components/NoteList';
 import { gql } from '@apollo/client';
 
 
-export const NOTES_QUERY = gql`
+export const NOTES_QUERY_DESC = gql`
+query GetNotes {
+  notes (order_by: {id: desc}){
+    id
+    text
+  }
+}`;
+
+export const NOTES_QUERY_ASC = gql`
+query GetNotes {
+  notes (order_by: {id: asc}){
+    id
+    text
+  }
+}`;
+
+export const NOTES_QUERY_LAST_CHANGED = gql`
 query GetNotes {
   notes {
     id
