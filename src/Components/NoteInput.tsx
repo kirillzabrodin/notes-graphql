@@ -1,24 +1,29 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Box, Button, TextField } from "@mui/material";
-import { NoteInputProps } from '../types';
+import { useMutation } from '@apollo/client';
+import { ADD_NOTE } from '../App';
 
-
-const NoteInput: React.FC<NoteInputProps> = ( {saveNoteToDB} ) => {
+const NoteInput = () => {
 
 	const [newNote, newNoteSetter] = useState<string>("");
-	const textAreaRef = useRef<HTMLDivElement>(null)
+	const textAreaRef = useRef<HTMLTextAreaElement>(null)
 
-	const changeNoteInput = (value: string) => {
-		let length = 180
-		newNoteSetter(value.substring(0, length));
-  }
+  const [addNote, { error }] = useMutation(ADD_NOTE);
 
-	useEffect(() => {
-    console.log(textAreaRef.current);
-  }, [textAreaRef]);
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    let length = 180
+    let limitedText = event.target.value.substring(0, length)
+    // Used `limitedText` as newNote is updates async
+		newNoteSetter(limitedText);
+    if (textAreaRef.current !== null) textAreaRef.current.value = limitedText
+  };
 
 	const saveNote = () => {
-		saveNoteToDB(newNote)
+    if (textAreaRef.current !== null) {
+      addNote({ variables: { text: newNote } });
+      if (error) alert("Something went wrong :( " + error)
+      textAreaRef.current.value = ""
+    }
 	}
 
   return (
@@ -33,16 +38,11 @@ const NoteInput: React.FC<NoteInputProps> = ( {saveNoteToDB} ) => {
       <div>
         <TextField
           id="outlined-multiline-flexible"
-					ref={textAreaRef}
+					inputRef={textAreaRef}
           label="Note Text"
           multiline
 					placeholder="180 Characters Max"
-          onChange={(e) => {
-						let length = 180
-						let trimmedNote = e.target.value.substring(0, length)
-						e.target.value = trimmedNote
-						changeNoteInput(trimmedNote)}
-					}
+          onChange={handleChange}
         />
       </div>
 			<Button variant="outlined" onClick={saveNote}>Add Note</Button>

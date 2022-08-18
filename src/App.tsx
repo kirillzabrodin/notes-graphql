@@ -3,35 +3,43 @@ import './App.css';
 import Header from './Components/Header';
 import NoteInput from './Components/NoteInput';
 import NoteList from './Components/NoteList';
-import { useQuery, gql, useMutation } from '@apollo/client';
+import { gql } from '@apollo/client';
 
 
 export const NOTES_QUERY = gql`
 query GetNotes {
-  note {
+  notes {
+    id
     text
   }
 }`;
 
 export const ADD_NOTE = gql`
-mutation AddNote($type: String!) {
-  addTodo(type: $type) {
+mutation AddNote($text: String!) {
+  insert_notes_one(object: {text: $text}) {
+    id
     text
+  }
+}`;
+
+export const UPDATE_NOTE = gql`
+mutation UpdateNote($id: Int!, $text: String!) {
+  update_notes(where: {id: {_eq: $id}} _set: {text: $text}) {
+    returning {
+      id 
+      text
+    }
   }
 }`;
 
 
 function App() {
 
-  const saveNoteToDB = (value: string) => {
-    console.log("Saving...")
-  }
-
   return (
     <div className="App">
       <Header/>
-      <NoteInput saveNoteToDB={saveNoteToDB}/>
-      <NoteList getNoteFromDB={[]}/>
+      <NoteInput/>
+      <NoteList/>
     </div>
   );
 }
